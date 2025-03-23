@@ -2,30 +2,15 @@ package cmd
 
 import (
 	"fmt"
-	"os"
-	"os/exec"
-	"strings"
 
 	"github.com/spf13/cobra"
+	"github.com/yourusername/lorvi/internal/tools"
 )
 
-func validateKubectlArgs(args []string) error {
-	for _, arg := range args {
-		if strings.Contains(arg, ";") || strings.Contains(arg, "|") {
-			return fmt.Errorf("invalid character in argument: %s", arg)
-		}
-	}
-	return nil
-}
+var executor = tools.NewSecureCommandExecutor([]string{"kubectl"})
 
 func RunKubectl(cmdArgs []string) error {
-	if err := validateKubectlArgs(cmdArgs); err != nil {
-		return err
-	}
-	fmt.Printf("Running kubectl with args: %v\n", cmdArgs)
-	cmd := exec.Command("kubectl", cmdArgs...)
-	cmd.Env = os.Environ()
-	out, err := cmd.CombinedOutput()
+	out, err := executor.Execute("kubectl", cmdArgs)
 	if err != nil {
 		return fmt.Errorf("error: %v\noutput: %s", err, out)
 	}

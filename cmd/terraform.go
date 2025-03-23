@@ -2,8 +2,6 @@ package cmd
 
 import (
 	"fmt"
-	"os"
-	"os/exec"
 	"strings"
 
 	"github.com/spf13/cobra"
@@ -19,13 +17,7 @@ func validateTerraformArgs(args []string) error {
 }
 
 func RunTerraform(cmdArgs []string) error {
-	if err := validateTerraformArgs(cmdArgs); err != nil {
-		return err
-	}
-	fmt.Printf("Running terraform with args: %v\n", cmdArgs)
-	cmd := exec.Command("terraform", cmdArgs...)
-	cmd.Env = os.Environ()
-	out, err := cmd.CombinedOutput()
+	out, err := executor.Execute("terraform", cmdArgs)
 	if err != nil {
 		return fmt.Errorf("error: %v\noutput: %s", err, out)
 	}

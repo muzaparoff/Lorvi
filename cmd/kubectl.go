@@ -7,7 +7,7 @@ import (
 	"github.com/spf13/cobra"
 )
 
-var executor = tools.NewSecureCommandExecutor([]string{"kubectl"})
+var executor tools.CommandExecutor = tools.NewSecureCommandExecutor([]string{"kubectl"})
 
 func RunKubectl(cmdArgs []string) error {
 	out, err := executor.Execute("kubectl", cmdArgs)

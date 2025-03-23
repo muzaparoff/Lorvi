@@ -20,8 +20,10 @@ var rootCmd = &cobra.Command{
 various tools like kubectl and terraform, and supports AI backends 
 such as Ollama, OpenAI, Claude, and Gemini.`,
 	Run: func(cmd *cobra.Command, args []string) {
-		// If no subcommand is provided, show help.
-		cmd.Help()
+		if err := cmd.Help(); err != nil {
+			fmt.Printf("Error displaying help: %v\n", err)
+			os.Exit(1)
+		}
 	},
 }
 

@@ -3,16 +3,17 @@ name: Build & Security Scan
 on:
   push:
     branches: [ main ]
+    tags: [ 'v*.*.*' ]
   pull_request:
     branches: [ main ]
-  release:
-    types: [ created ]
 
 jobs:
   build:
     runs-on: macos-latest
     steps:
       - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
 
       - name: Set up Go
         uses: actions/setup-go@v4
@@ -47,38 +48,32 @@ jobs:
       - name: Upload Artifact
         uses: actions/upload-artifact@v4
         with:
-          name: lorvi-darwin-amd64
-          path: lorvi-darwin-amd64
+          name: lorvi-darwin
+          path: |
+            lorvi-darwin-amd64
+            lorvi-darwin-arm64
+          if-no-files-found: error
 
   release:
     needs: build
+    if: startsWith(github.ref, 'refs/tags/v')
     runs-on: ubuntu-latest
-    if: github.event_name == 'release'
+    permissions:
+      contents: write
     steps:
       - uses: actions/checkout@v4
-
-      - name: Set up Go
-        uses: actions/setup-go@v4
+      
+      - uses: actions/download-artifact@v4
         with:
-          go-version: '1.20'
+          name: lorvi-darwin
+          path: .
 
-      - name: Build Release Binaries
+      - name: Generate Checksums
         run: |
-          VERSION=${GITHUB_REF#refs/tags/}
-          COMMIT=$(git rev-parse --short HEAD)
-          LDFLAGS="-X github.com/muzaparoff/lorvi/cmd.Version=${VERSION} -X github.com/muzaparoff/lorvi/cmd.Commit=${COMMIT}"
-          
-          # Build for different platforms
-          GOOS=darwin GOARCH=amd64 go build -ldflags "${LDFLAGS}" -o lorvi-darwin-amd64 .
-          GOOS=darwin GOARCH=arm64 go build -ldflags "${LDFLAGS}" -o lorvi-darwin-arm64 .
-          
-          # Create checksums
           sha256sum lorvi-darwin-* > checksums.txt
-
+          
       - name: Create Release
         uses: softprops/action-gh-release@v1
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
           files: |
             lorvi-darwin-amd64

@@ -11,22 +11,33 @@ import (
 var (
 	// Allowlist of safe characters in command arguments
 	safeArgPattern = regexp.MustCompile(`^[a-zA-Z0-9\-\._/=@:]+$`)
+	// Allowlist of safe characters in command paths
+	safePathPattern = regexp.MustCompile(`^[a-zA-Z0-9\-\._/]+$`)
 )
 
 // SecureCommandExecutor handles safe command execution
 type SecureCommandExecutor struct {
 	allowedCommands map[string]bool
+	commandPaths    map[string]string
 }
 
 // NewSecureCommandExecutor creates a new executor with allowed commands
 func NewSecureCommandExecutor(commands []string) *SecureCommandExecutor {
 	allowed := make(map[string]bool)
+	paths := make(map[string]string)
 	for _, cmd := range commands {
 		if path, err := exec.LookPath(cmd); err == nil {
-			allowed[filepath.Clean(path)] = true
+			cleanPath := filepath.Clean(path)
+			if safePathPattern.MatchString(cleanPath) {
+				allowed[cleanPath] = true
+				paths[cmd] = cleanPath
+			}
 		}
 	}
-	return &SecureCommandExecutor{allowedCommands: allowed}
+	return &SecureCommandExecutor{
+		allowedCommands: allowed,
+		commandPaths:    paths,
+	}
 }
 
 // ValidateArgs checks if command arguments are safe
@@ -41,12 +52,9 @@ func (e *SecureCommandExecutor) ValidateArgs(args []string) error {
 
 // Execute runs a command securely
 func (e *SecureCommandExecutor) Execute(command string, args []string) ([]byte, error) {
-	path, err := exec.LookPath(command)
-	if err != nil {
-		return nil, fmt.Errorf("command not found: %s", command)
-	}
-
-	if !e.allowedCommands[filepath.Clean(path)] {
+	// Get pre-validated command path
+	path, ok := e.commandPaths[command]
+	if !ok {
 		return nil, fmt.Errorf("command not allowed: %s", command)
 	}
 
@@ -54,6 +62,7 @@ func (e *SecureCommandExecutor) Execute(command string, args []string) ([]byte, 
 		return nil, err
 	}
 
+	// Use the pre-validated path directly
 	cmd := exec.Command(path, args...)
 	cmd.Env = os.Environ()
 	return cmd.CombinedOutput()

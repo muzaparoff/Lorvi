@@ -47,7 +47,7 @@ Lorvi is a terminal-based, AI-powered DevOps assistant built in Golang. It provi
 Clone the repository and build Lorvi:
 
 ```bash
-git clone https://github.com/yourusername/lorvi.git
+git clone https://github.com/muzaparoff/lorvi.git
 cd lorvi
 go build -o lorvi .
 ```

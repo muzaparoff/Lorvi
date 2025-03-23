@@ -13,6 +13,11 @@ var (
 	safeArgPattern = regexp.MustCompile(`^[a-zA-Z0-9\-\._/=@:]+$`)
 	// Allowlist of safe characters in command paths
 	safePathPattern = regexp.MustCompile(`^[a-zA-Z0-9\-\._/]+$`)
+	// Whitelist of allowed commands
+	allowedCommands = map[string]bool{
+		"kubectl":   true,
+		"terraform": true,
+	}
 )
 
 // SecureCommandExecutor handles safe command execution
@@ -52,6 +57,10 @@ func (e *SecureCommandExecutor) ValidateArgs(args []string) error {
 
 // Execute runs a command securely
 func (e *SecureCommandExecutor) Execute(command string, args []string) ([]byte, error) {
+	if !allowedCommands[command] {
+		return nil, fmt.Errorf("command not in whitelist: %s", command)
+	}
+
 	// Get pre-validated command path
 	path, ok := e.commandPaths[command]
 	if !ok {
@@ -62,7 +71,7 @@ func (e *SecureCommandExecutor) Execute(command string, args []string) ([]byte, 
 		return nil, err
 	}
 
-	// Use the pre-validated path directly
+	// #nosec G204 -- path and args are validated above
 	cmd := exec.Command(path, args...)
 	cmd.Env = os.Environ()
 	return cmd.CombinedOutput()

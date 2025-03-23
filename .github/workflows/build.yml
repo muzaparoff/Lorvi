@@ -27,9 +27,11 @@ jobs:
 
       - name: Build for macOS
         run: |
-          VERSION=$(git describe --tags --always --dirty)
+          VERSION=$(git describe --tags --always --dirty || echo "dev")
           COMMIT=$(git rev-parse --short HEAD)
-          GOOS=darwin GOARCH=amd64 go build -ldflags "-X github.com/muzaparoff/lorvi/cmd.Version=${VERSION} -X github.com/muzaparoff/lorvi/cmd.Commit=${COMMIT}" -o lorvi-darwin-amd64 .
+          # Build for both architectures
+          GOOS=darwin GOARCH=amd64 go build -ldflags "-X github.com/muzaparoff/lorvi/cmd.Version=${VERSION}" -o lorvi-darwin-amd64
+          GOOS=darwin GOARCH=arm64 go build -ldflags "-X github.com/muzaparoff/lorvi/cmd.Version=${VERSION}" -o lorvi-darwin-arm64
           ls -l
 
       - name: Run Tests

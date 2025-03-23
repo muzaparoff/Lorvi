@@ -30,7 +30,7 @@ jobs:
       - name: Run Tests
         run: go test ./...
 
-      - name: Run Security Scan (gosec)
+      - name: Run Security Scan (gosec∏
         run: |
           go install github.com/securego/gosec/v2/cmd/gosec@latest
           gosec ./...
@@ -39,7 +39,7 @@ jobs:
         run: govulncheck ./...
 
       - name: Upload Artifact
-        uses: actions/upload-artifact@v2
+        uses: actions/upload-artifact@v3
         with:
           name: lorvi-darwin-amd64
           path: lorvi-darwin-amd64

@@ -26,6 +26,11 @@ type SecureCommandExecutor struct {
 	commandPaths    map[string]string
 }
 
+// CommandExecutor interface for mocking in tests
+type CommandExecutor interface {
+	Execute(command string, args []string) ([]byte, error)
+}
+
 // NewSecureCommandExecutor creates a new executor with allowed commands
 func NewSecureCommandExecutor(commands []string) *SecureCommandExecutor {
 	allowed := make(map[string]bool)
@@ -42,6 +47,17 @@ func NewSecureCommandExecutor(commands []string) *SecureCommandExecutor {
 	return &SecureCommandExecutor{
 		allowedCommands: allowed,
 		commandPaths:    paths,
+	}
+}
+
+// NewMockExecutor creates a test executor that doesn't actually run commands
+func NewMockExecutor() *SecureCommandExecutor {
+	return &SecureCommandExecutor{
+		allowedCommands: allowedCommands,
+		commandPaths: map[string]string{
+			"kubectl":   "/usr/local/bin/kubectl",
+			"terraform": "/usr/local/bin/terraform",
+		},
 	}
 }
 

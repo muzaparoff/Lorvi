@@ -2,9 +2,16 @@ package cmd
 
 import (
 	"testing"
+
+	"github.com/yourusername/lorvi/internal/tools"
 )
 
 func TestRunKubectl(t *testing.T) {
+	// Replace global executor with mock for testing
+	originalExecutor := executor
+	executor = tools.NewMockExecutor()
+	defer func() { executor = originalExecutor }()
+
 	tests := []struct {
 		name    string
 		args    []string

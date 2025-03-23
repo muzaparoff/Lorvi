@@ -32,13 +32,15 @@ jobs:
       - name: Run Tests
         run: go test ./...
 
-      - name: Run Security Scan (gosec∏
+      - name: Run Security Scan (gosec)
         run: |
-          go install github.com/securego/gosec/v2/cmd/gosec@latest
+          go install github.com/securego/gosec/v2/cmd/gosec@v2.18.2
           gosec ./...
 
       - name: Run Vulnerability Check (govulncheck)
-        run: govulncheck ./...
+        run: |
+          go install golang.org/x/vuln/cmd/govulncheck@latest
+          govulncheck ./...
 
       - name: Upload Artifact
         uses: actions/upload-artifact@v4

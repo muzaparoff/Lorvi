@@ -5,15 +5,34 @@ on:
     branches:
       - main
 
+permissions:
+  contents: write
+  pull-requests: write
+
 jobs:
   release-please:
     runs-on: ubuntu-latest
-    outputs:
-      release_created: ${{ steps.release.outputs.release_created }}
-      tag_name: ${{ steps.release.outputs.tag_name }}
     steps:
-      - id: release
-        uses: googleapis/release-please-action@v4
+      - uses: google-github-actions/release-please-action@v4
+        id: release
         with:
           release-type: go
           token: ${{ secrets.GITHUB_TOKEN }}
+          include-v-in-tag: true
+          releases-only: true
+
+      - uses: actions/checkout@v4
+        if: ${{ steps.release.outputs.release_created }}
+
+      - uses: actions/setup-go@v4
+        if: ${{ steps.release.outputs.release_created }}
+        with:
+          go-version: '1.20'
+
+      - name: Build Release
+        if: ${{ steps.release.outputs.release_created }}
+        env:
+          RELEASE_TAG: ${{ steps.release.outputs.tag_name }}
+        run: |
+          make build
+          tar czf lorvi-${RELEASE_TAG}-darwin-amd64.tar.gz lorvi

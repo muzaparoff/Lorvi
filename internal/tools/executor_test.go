@@ -17,7 +17,7 @@ func TestSecureCommandExecutor(t *testing.T) {
 		{"invalid args", "kubectl", []string{";dangerous"}, true},
 	}
 
-	executor := NewMockExecutor()
+	executor := NewTestExecutor()
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {

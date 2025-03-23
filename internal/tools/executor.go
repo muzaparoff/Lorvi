@@ -92,3 +92,32 @@ func (e *SecureCommandExecutor) Execute(command string, args []string) ([]byte, 
 	cmd.Env = os.Environ()
 	return cmd.CombinedOutput()
 }
+
+// MockCommandExecutor for testing
+type MockCommandExecutor struct {
+	MockOutput []byte
+	MockError  error
+}
+
+func NewTestExecutor() *MockCommandExecutor {
+	return &MockCommandExecutor{
+		MockOutput: []byte("mocked output"),
+		MockError:  nil,
+	}
+}
+
+func (m *MockCommandExecutor) Execute(command string, args []string) ([]byte, error) {
+	// Validate command is in whitelist
+	if !allowedCommands[command] {
+		return nil, fmt.Errorf("command not in whitelist: %s", command)
+	}
+
+	// Simulate argument validation
+	for _, arg := range args {
+		if !safeArgPattern.MatchString(arg) {
+			return nil, fmt.Errorf("invalid argument format: %s", arg)
+		}
+	}
+
+	return m.MockOutput, m.MockError
+}

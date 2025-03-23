@@ -7,10 +7,10 @@ import (
 )
 
 func TestRunKubectl(t *testing.T) {
-	// Replace global executor with mock for testing
-	originalExecutor := executor
-	executor = tools.NewMockExecutor()
-	defer func() { executor = originalExecutor }()
+	mockExecutor := tools.NewTestExecutor()
+	savedExecutor := executor
+	executor = &tools.SecureCommandExecutor{CommandExecutor: mockExecutor}
+	defer func() { executor = savedExecutor }()
 
 	tests := []struct {
 		name    string

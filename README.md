@@ -1,9 +1,9 @@
 # Lorvi
 
-[![Build Status](https://github.com/yourusername/lorvi/actions/workflows/build.yml/badge.svg)](https://github.com/yourusername/lorvi/actions)
+[![Build Status](https://github.com/muzaparoff/lorvi/actions/workflows/build.yml/badge.svg)](https://github.com/muzaparoff/lorvi/actions)
 [![Security Scan](https://img.shields.io/badge/Security-passing-brightgreen)](#)
-[![Latest Release](https://img.shields.io/github/v/release/yourusername/lorvi)](https://github.com/yourusername/lorvi/releases)
-[![Go Report Card](https://goreportcard.com/badge/github.com/yourusername/lorvi)](https://goreportcard.com/report/github.com/yourusername/lorvi)
+[![Latest Release](https://img.shields.io/github/v/release/muzaparoff/lorvi)](https://github.com/muzaparoff/lorvi/releases)
+[![Go Report Card](https://goreportcard.com/badge/github.com/muzaparoff/lorvi)](https://goreportcard.com/report/github.com/muzaparoff/lorvi)
 
 Lorvi is a terminal-based, AI-powered DevOps assistant built in Golang. It provides a unified CLI interface for common DevOps tools like **kubectl** and **terraform**, integrates with multiple AI backends (Ollama, OpenAI, Claude, Gemini), and supports both local and cloud API integrations (AWS, Azure, GCP).
 

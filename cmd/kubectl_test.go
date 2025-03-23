@@ -3,13 +3,16 @@ package cmd
 import (
 	"testing"
 
-	"github.com/yourusername/lorvi/internal/tools"
+	"github.com/muzaparoff/lorvi/internal/tools"
 )
 
 func TestRunKubectl(t *testing.T) {
+	// Create mock executor and save original
 	mockExecutor := tools.NewTestExecutor()
 	savedExecutor := executor
-	executor = &tools.SecureCommandExecutor{CommandExecutor: mockExecutor}
+	// Replace global executor with mock
+	executor = mockExecutor
+	// Restore original executor after test
 	defer func() { executor = savedExecutor }()
 
 	tests := []struct {

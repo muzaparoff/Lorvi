@@ -1,4 +1,4 @@
-module github.com/yourusername/lorvi
+module github.com/muzaparoff/lorvi
 
 go 1.20
 

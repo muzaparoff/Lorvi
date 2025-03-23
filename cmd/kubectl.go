@@ -3,8 +3,8 @@ package cmd
 import (
 	"fmt"
 
+	"github.com/muzaparoff/lorvi/internal/tools"
 	"github.com/spf13/cobra"
-	"github.com/yourusername/lorvi/internal/tools"
 )
 
 var executor = tools.NewSecureCommandExecutor([]string{"kubectl"})

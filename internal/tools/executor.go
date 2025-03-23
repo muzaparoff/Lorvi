@@ -31,6 +31,10 @@ type CommandExecutor interface {
 	Execute(command string, args []string) ([]byte, error)
 }
 
+// Ensure SecureCommandExecutor implements CommandExecutor
+var _ CommandExecutor = (*SecureCommandExecutor)(nil)
+var _ CommandExecutor = (*MockCommandExecutor)(nil)
+
 // NewSecureCommandExecutor creates a new executor with allowed commands
 func NewSecureCommandExecutor(commands []string) *SecureCommandExecutor {
 	allowed := make(map[string]bool)

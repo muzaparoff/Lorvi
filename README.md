@@ -77,6 +77,73 @@ go build -o lorvi .
 ./lorvi kubectl get services -e prod --cloud aws
 ```
 
+## Test Environment
+
+Lorvi comes with a complete test environment setup including:
+- Local K3s cluster (via Multipass)
+- Ollama AI backend
+- Full monitoring stack
+
+### Prerequisites
+- macOS (tested on M1/M2)
+- Homebrew
+- Go 1.20+
+
+### Quick Start
+
+1. Clone and build:
+```bash
+git clone https://github.com/muzaparoff/lorvi.git
+cd lorvi
+make build
+```
+
+2. Set up test environment:
+```bash
+make setup-test-env
+```
+
+This will:
+- Install K3s via Multipass
+- Install Ollama with CodeLlama model
+- Deploy monitoring stack (Prometheus, Loki, Grafana)
+- Create test workload
+
+### Monitoring Stack
+
+The test environment includes:
+- Prometheus for metrics collection
+- Loki for log aggregation
+- Grafana for visualization
+
+Access Grafana:
+```bash
+make grafana-dashboard
+```
+Then open http://localhost:3000 (admin/admin123)
+
+### Test Commands
+
+Try these commands:
+```bash
+# View test pods
+lorvi kubectl get pods -n lorvi-test
+
+# View monitoring stack
+lorvi kubectl get pods -n monitoring
+
+# Access Grafana
+make grafana-dashboard
+```
+
+### Cleanup
+
+Remove test environment:
+```bash
+make clean-test-env
+make clean-monitoring
+```
+
 ## CI/CD and Releases
 
 Lorvi uses GitHub Actions for continuous integration:

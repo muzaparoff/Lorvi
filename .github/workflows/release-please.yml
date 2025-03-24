@@ -14,60 +14,48 @@ jobs:
   release:
     name: Release
     runs-on: ubuntu-latest
+    outputs:
+      released: ${{ steps.semantic.outputs.released }}
+      version: ${{ steps.semantic.outputs.version }}
     steps:
       - uses: actions/checkout@v4
         with:
           fetch-depth: 0
+          token: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
           node-version: 'lts/*'
 
-      - name: Install dependencies
-        run: npm install -g semantic-release @semantic-release/git @semantic-release/github
-
-      - name: Configure Git
-        run: |
-          git config --global user.email "github-actions[bot]@users.noreply.github.com"
-          git config --global user.name "github-actions[bot]"
-
-      - name: Set initial version if no tags exist
-        run: |
-          if ! git describe --tags > /dev/null 2>&1; then
-            git tag -a v0.1.0 -m "Initial release"
-            git push origin v0.1.0
-          fi
-
-      - name: Create Release
+      - name: Semantic Release
+        id: semantic
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        run: npx semantic-release
-
-      - name: Get version
-        id: get_version
         run: |
-          VERSION=$(git describe --tags --abbrev=0 || echo "v0.1.0")
-          echo "VERSION=$VERSION" >> $GITHUB_ENV
+          npm install -g semantic-release @semantic-release/git @semantic-release/github conventional-changelog-conventionalcommits
+          npx semantic-release
 
       - name: Setup Go
+        if: steps.semantic.outputs.released == 'true'
         uses: actions/setup-go@v4
         with:
           go-version: '1.20'
 
       - name: Build Release
-        if: ${{ success() }}
+        if: steps.semantic.outputs.released == 'true'
         run: |
-          GOOS=darwin GOARCH=amd64 go build -ldflags "-X github.com/muzaparoff/lorvi/cmd.Version=${VERSION}" -o lorvi-darwin-amd64
-          GOOS=darwin GOARCH=arm64 go build -ldflags "-X github.com/muzaparoff/lorvi/cmd.Version=${VERSION}" -o lorvi-darwin-arm64
-          tar czf lorvi-${VERSION}-darwin-amd64.tar.gz lorvi-darwin-amd64
-          tar czf lorvi-${VERSION}-darwin-arm64.tar.gz lorvi-darwin-arm64
+          VERSION=${{ steps.semantic.outputs.version }}
+          GOOS=darwin GOARCH=amd64 go build -ldflags "-X github.com/muzaparoff/lorvi/cmd.Version=v${VERSION}" -o lorvi-darwin-amd64
+          GOOS=darwin GOARCH=arm64 go build -ldflags "-X github.com/muzaparoff/lorvi/cmd.Version=v${VERSION}" -o lorvi-darwin-arm64
+          tar czf lorvi-v${VERSION}-darwin-amd64.tar.gz lorvi-darwin-amd64
+          tar czf lorvi-v${VERSION}-darwin-arm64.tar.gz lorvi-darwin-arm64
 
       - name: Upload Release Assets
-        if: ${{ success() }}
+        if: steps.semantic.outputs.released == 'true'
         uses: softprops/action-gh-release@v1
         with:
-          tag_name: ${{ env.VERSION }}
+          tag_name: v${{ steps.semantic.outputs.version }}
           files: |
-            lorvi-*-darwin-*.tar.gz
+            lorvi-v${{ steps.semantic.outputs.version }}-darwin-*.tar.gz
           generate_release_notes: true

@@ -160,6 +160,52 @@ Lorvi uses GitHub Actions for continuous integration:
 
 Contributions are welcome! Please see CONTRIBUTING.md for guidelines.
 
+### Commit Message Convention
+
+This project follows [Conventional Commits](https://www.conventionalcommits.org/) specification. Commit messages should be structured as follows:
+
+```
+<type>[optional scope]: <description>
+
+[optional body]
+
+[optional footer(s)]
+```
+
+Types:
+- `feat`: A new feature (minor version bump)
+- `fix`: A bug fix (patch version bump)
+- `docs`: Documentation only changes
+- `style`: Changes that don't affect the code's meaning
+- `refactor`: Code change that neither fixes a bug nor adds a feature
+- `perf`: Code change that improves performance
+- `test`: Adding missing tests
+- `chore`: Changes to the build process or auxiliary tools
+
+Breaking Changes:
+- Include `BREAKING CHANGE:` in commit message footer
+- Or append `!` after type/scope
+- Triggers major version bump
+
+Examples:
+```bash
+# Feature with breaking change
+feat!: add automated versioning support
+feat: add kubernetes support
+
+# Bug fix
+fix: correct version detection
+fix(core): handle missing config file
+
+# Documentation
+docs: explain commit message format
+
+# Breaking change with description
+feat: remove support for Node 12
+
+BREAKING CHANGE: Node 12 is no longer supported due to EOL
+```
+
 ## License
 
 This project is licensed under the MIT License – see the LICENSE file for details.

@@ -1,6 +1,15 @@
 #!/bin/bash
 set -e
 
+echo "Checking monitoring stack status..."
+
+# Check if monitoring namespace exists and has deployments
+if kubectl get namespace monitoring &> /dev/null && \
+   kubectl get deployments -n monitoring &> /dev/null; then
+    echo "Monitoring stack already installed. Skipping installation."
+    exit 0
+fi
+
 echo "Installing monitoring stack..."
 
 # Install Helm if not present

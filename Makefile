@@ -2,7 +2,7 @@ VERSION ?= $(shell git describe --tags --always --dirty)
 COMMIT  ?= $(shell git rev-parse --short HEAD)
 LDFLAGS := -X github.com/muzaparoff/lorvi/cmd.Version=$(VERSION) -X github.com/muzaparoff/lorvi/cmd.Commit=$(COMMIT)
 
-.PHONY: build test release initial-release setup-test-env clean-test-env setup-monitoring grafana-dashboard clean-monitoring
+.PHONY: build test release initial-release setup-test-env clean-test-env setup-monitoring grafana-dashboard clean-monitoring install
 
 build:
 	go build -ldflags "$(LDFLAGS)" -o lorvi .
@@ -41,3 +41,7 @@ grafana-dashboard:
 clean-monitoring:
 	helm uninstall -n monitoring monitoring loki
 	kubectl delete namespace monitoring
+
+install:
+	chmod +x scripts/install_lorvi.sh
+	./scripts/install_lorvi.sh

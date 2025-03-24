@@ -1,6 +1,14 @@
 #!/bin/bash
 set -e
 
+echo "Checking Ollama status..."
+
+# Check if Ollama is running
+if pgrep -x "ollama" > /dev/null; then
+    echo "Ollama is already running. Skipping installation."
+    exit 0
+fi
+
 echo "Installing Ollama on macOS..."
 
 # Install Ollama

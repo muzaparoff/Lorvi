@@ -100,6 +100,7 @@ make build
 
 2. Set up test environment:
 ```bash
+chmod +x scripts/*.sh
 make setup-test-env
 ```
 

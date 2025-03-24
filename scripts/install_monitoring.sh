@@ -3,6 +3,12 @@ set -e
 
 echo "Installing monitoring stack..."
 
+# Install Helm if not present
+if ! command -v helm &> /dev/null; then
+    echo "Installing Helm..."
+    brew install helm
+fi
+
 # Add Helm repositories
 helm repo add prometheus-community https://prometheus-community.github.io/helm-charts
 helm repo add grafana https://grafana.github.io/helm-charts

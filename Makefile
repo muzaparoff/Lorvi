@@ -24,6 +24,7 @@ initial-release:
 	git push origin v0.1.0
 
 setup-test-env:
+	chmod +x scripts/*.sh
 	./scripts/setup_test_env.sh
 
 clean-test-env:

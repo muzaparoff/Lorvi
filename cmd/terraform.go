@@ -35,7 +35,27 @@ var terraformCmd = &cobra.Command{
 			return
 		}
 
-		// Build the command. Append environment flag if provided.
+		// Check if this is an analysis request
+		if args[0] == "analyze" {
+			analyzer := ai.NewTerraformAnalyzer(".")
+			var analysis string
+			var err error
+
+			if len(args) > 1 && args[1] == "state" {
+				analysis, err = analyzer.AnalyzeState()
+			} else {
+				analysis, err = analyzer.AnalyzePlan()
+			}
+
+			if err != nil {
+				fmt.Printf("Error analyzing Terraform: %v\n", err)
+				return
+			}
+			fmt.Printf("\nAI Terraform Analysis:\n%s\n", analysis)
+			return
+		}
+
+		// Regular terraform command handling
 		cmdArgs := args
 		if env != "" {
 			// For example, pass env as a variable file.

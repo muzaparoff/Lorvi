@@ -3,6 +3,7 @@ package cmd
 import (
 	"fmt"
 
+	"github.com/muzaparoff/lorvi/internal/ai"
 	"github.com/muzaparoff/lorvi/internal/tools"
 	"github.com/spf13/cobra"
 )
@@ -26,6 +27,22 @@ var kubectlCmd = &cobra.Command{
 	Run: func(cmd *cobra.Command, args []string) {
 		if len(args) == 0 {
 			fmt.Println("Please provide kubectl arguments, e.g., 'get pods'")
+			return
+		}
+
+		// Check if this is a logs analysis request
+		if args[0] == "analyze-logs" {
+			namespace := "default"
+			if len(args) > 1 {
+				namespace = args[1]
+			}
+			analyzer := ai.NewLogAnalyzer(namespace)
+			analysis, err := analyzer.AnalyzeLogs()
+			if err != nil {
+				fmt.Printf("Error analyzing logs: %v\n", err)
+				return
+			}
+			fmt.Printf("\nAI Log Analysis for namespace %s:\n%s\n", namespace, analysis)
 			return
 		}
 

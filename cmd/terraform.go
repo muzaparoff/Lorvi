@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"strings"
 
+	"github.com/muzaparoff/lorvi/internal/ai"
 	"github.com/spf13/cobra"
 )
 

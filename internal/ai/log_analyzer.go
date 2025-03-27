@@ -3,16 +3,43 @@ package ai
 import (
 	"bytes"
 	"fmt"
-	"os/exec"
+	"regexp"
 	"strings"
+
+	"github.com/muzaparoff/lorvi/internal/tools"
+)
+
+var (
+	// Safe namespace pattern
+	safeNamespacePattern = regexp.MustCompile(`^[a-z0-9][a-z0-9-]*[a-z0-9]$`)
+	// Safe pod name pattern
+	safePodNamePattern = regexp.MustCompile(`^[a-z0-9][a-z0-9-]*[a-z0-9]$`)
 )
 
 type LogAnalyzer struct {
 	namespace string
+	executor  tools.CommandExecutor
 }
 
 func NewLogAnalyzer(namespace string) *LogAnalyzer {
-	return &LogAnalyzer{namespace: namespace}
+	return &LogAnalyzer{
+		namespace: namespace,
+		executor:  tools.NewSecureCommandExecutor([]string{"kubectl", "ollama"}),
+	}
+}
+
+func (la *LogAnalyzer) validateNamespace() error {
+	if !safeNamespacePattern.MatchString(la.namespace) {
+		return fmt.Errorf("invalid namespace format: %s", la.namespace)
+	}
+	return nil
+}
+
+func (la *LogAnalyzer) validatePodName(pod string) error {
+	if !safePodNamePattern.MatchString(pod) {
+		return fmt.Errorf("invalid pod name format: %s", pod)
+	}
+	return nil
 }
 
 func (la *LogAnalyzer) AnalyzeLogs() (string, error) {
@@ -57,8 +84,15 @@ Logs by pod:
 }
 
 func (la *LogAnalyzer) getPods() ([]string, error) {
-	cmd := exec.Command("kubectl", "get", "pods", "-n", la.namespace, "-o", "jsonpath={.items[*].metadata.name}")
-	output, err := cmd.CombinedOutput()
+	if err := la.validateNamespace(); err != nil {
+		return nil, err
+	}
+
+	output, err := la.executor.Execute("kubectl", []string{
+		"get", "pods",
+		"-n", la.namespace,
+		"-o", "jsonpath={.items[*].metadata.name}",
+	})
 	if err != nil {
 		return nil, err
 	}
@@ -66,8 +100,16 @@ func (la *LogAnalyzer) getPods() ([]string, error) {
 }
 
 func (la *LogAnalyzer) getPodLogs(pod string) (string, error) {
-	cmd := exec.Command("kubectl", "logs", "-n", la.namespace, pod, "--tail=100")
-	output, err := cmd.CombinedOutput()
+	if err := la.validatePodName(pod); err != nil {
+		return "", err
+	}
+
+	output, err := la.executor.Execute("kubectl", []string{
+		"logs",
+		"-n", la.namespace,
+		pod,
+		"--tail=100",
+	})
 	if err != nil {
 		return "", err
 	}
@@ -83,8 +125,7 @@ func (la *LogAnalyzer) formatLogsForPrompt(logs map[string]string) string {
 }
 
 func (la *LogAnalyzer) getOllamaAnalysis(prompt string) (string, error) {
-	cmd := exec.Command("ollama", "run", "codellama", prompt)
-	output, err := cmd.CombinedOutput()
+	output, err := la.executor.Execute("ollama", []string{"run", "codellama", prompt})
 	if err != nil {
 		return "", fmt.Errorf("ollama analysis failed: %v", err)
 	}
